@@ -4,8 +4,8 @@ use warnings;
 
 use rlib "./";
 
-use MFValue;
-use base qw(MFValue);
+use MFScalar;
+use base qw(MFScalar);
 
 use SFDouble;
 our $SField = new SFDouble;

@@ -60,7 +60,7 @@ sub INIT_INSTANCE {
 		'Glib::Uint',       # COL_ROUTE
 	];
 
-	$this->{root}  = undef;
+	$this->{root}   = undef;
 	$this->{record} = {};
 
 	# Random int to check whether an iter belongs to our model
@@ -129,6 +129,7 @@ sub GET_ITER {
 
 	my $n      = 0;
 	my $object = $this->{root};
+	my $parent;
 
 	foreach (@indices) {
 		$n = $_;
@@ -138,6 +139,7 @@ sub GET_ITER {
 			$object = $node->getField($fieldName);
 		} elsif ( $object->isa('X3DField') ) {
 			if ( $object->getType eq "MFNode" ) {
+				$parent = $object;
 				$object = $object->getValue;
 				# Is this the last record in the list?
 				return undef if $n > $#$object;
@@ -148,8 +150,8 @@ sub GET_ITER {
 
 	return undef unless ref $object;
 
-	#X3DError::Debug $n, ref $parent, ref $object->getValue;
-	return $this->ITER( $n, object => $object );
+	X3DError::Debug $n, $object->getValue->getName, $object->getValue->getType if $object->isa('SFNode');
+	return $this->ITER( $n, $object, $parent );
 }
 
 #
@@ -182,8 +184,8 @@ sub GET_VALUE {
 
 	return undef unless $column < @{ $this->{column_types} };
 
-	my $parent = $iter->[2]->{parent};
 	my $object = $iter->[2]->{object};
+	#my $parent = $iter->[2]->{parent};
 
 	return undef unless ref $object;
 
@@ -207,35 +209,42 @@ sub GET_VALUE {
 
 sub ITER_NEXT {
 	my ( $this, $iter ) = @_;
-	#X3DError::Debug $iter->[1], ref $iter->[2]->{parent}, ref $iter->[2]->{object};
-
-	return undef unless $iter && $iter->[2]->{parent};
 
 	my $n      = $iter->[1] + 1;
-	my $parent = $iter->[2]->{object}->getParents;
 	my $object = $iter->[2]->{object};
+	my $parent = $iter->[2]->{parent};
 
-	#X3DError::Debug ref $parent;
-	if ( $parent->isa("SFNode") ) {
-		my $node             = $parent->getValue;
-		my $fieldDefinitions = $node->getFieldDefinitions;
-		return undef if $n > $#$fieldDefinitions;
+	X3DError::Debug "*" x 3;
+	X3DError::Debug $n, "object: ", ref $object;
+	X3DError::Debug $n, "parent: ", ref $parent;
+	X3DError::Debug $n, $object->getValue->getName, $object->getValue->getType if $object->isa('SFNode');
+	X3DError::Debug $n, $object->getType, $object->getName if $object->isa('X3DField');
 
-		my $fieldName = $node->getFieldDefinitions->[$n]->getName;
-		$object = $node->getField($fieldName);
-	} elsif ( $parent->isa("X3DField") ) {
+	if ( $object->isa("SFNode") ) {
 		if ( $parent->getType eq "MFNode" ) {
 			$object = $parent->getValue;
 			# Is this the last record in the list?
 			return undef if $n > $#$object;
 			$object = $object->[$n];
 		}
+	} elsif ( $object->isa("X3DField") ) {
+		my $node             = $parent->getValue;
+		my $fieldDefinitions = $node->getFieldDefinitions;
+		return undef if $n > $#$fieldDefinitions;
+
+		my $fieldName = $node->getFieldDefinitions->[$n]->getName;
+		$object = $node->getField($fieldName);
 	} else {
 		die;
 	}
 
-	#X3DError::Debug $iter->[1];
-	return $this->ITER( $n, object => $object );
+	die unless ref $object;
+
+	X3DError::Debug;
+	X3DError::Debug $n, ref $object;
+	X3DError::Debug $n, $object->getValue->getName, $object->getValue->getType if $object->isa('SFNode');
+	X3DError::Debug $n, $object->getType, $object->getName if $object->isa('X3DField');
+	return $this->ITER( $n, $object, $parent );
 }
 
 #
@@ -267,31 +276,30 @@ sub ITER_HAS_CHILD { &ITER_N_CHILDREN(@_) }
 
 sub ITER_N_CHILDREN {
 	my ( $this, $iter ) = @_;
-	#X3DError::Debug $iter->[2];
+
+	X3DError::Debug( ref $iter ? 1 : 0 );
 
 	# special case: if iter == NULL, return number of top-level rows
-	return $this->{root}->length if !$iter;
+	return $this->{root}->getValue->length if !$iter;
 
-	my $n      = $iter->[1];
-	my $parent = $iter->[2]->{parent};
+	my $n      = 0;
 	my $object = $iter->[2]->{object};
 
-	if ( $object->isa("MFNode") ) {
-		die;
-	} elsif ( $object->isa("SFNode") ) {
+	X3DError::Debug ref $object;
+
+	if ( $object->isa("SFNode") ) {
 		my $node             = $object->getValue;
 		my $fieldDefinitions = $node->getFieldDefinitions;
 		#X3DError::Debug scalar @$fieldDefinitions;
-		return scalar @$fieldDefinitions;
+		$n = @$fieldDefinitions;
 	} elsif ( $object->isa("X3DField") ) {
 		$object = $object->getValue;
 
-		return $object->length if $object->isa("MFNode");
-		#X3DError::Debug ref $object;
+		$n = $object->length if $object->isa("MFNode");
 	}
 
-	# no children zB: SFBool, SFInt32
-	return 0;
+	X3DError::Debug $n;
+	return $n;
 }
 
 #
@@ -304,19 +312,14 @@ sub ITER_N_CHILDREN {
 
 sub ITER_NTH_CHILD {
 	my ( $this, $iter, $n ) = @_;
-	#X3DError::Debug $n;
 
-	my $object;
-	my $parent;
+	# iter == NULL is a special case; we need to return the first top-level row
+	my $object = $iter ? $iter->[2]->{object} : $this->{root};
+	my $parent = $object;
 
-	if ($iter) {
-		$object = $iter->[2]->{object};
-		$parent = $iter->[2]->{parent};
-	} else {
-		# iter == NULL is a special case; we need to return the first top-level row
-		return undef unless ref $this->{root};
-		$object = $this->{root};
-	}
+	X3DError::Debug $n, ref $object;
+	X3DError::Debug $n, $object->getValue->getName, $object->getValue->getType if $object->isa('SFNode');
+	X3DError::Debug $n, $object->getType, $object->getName if $object->isa('X3DField');
 
 	if ( $object->isa("SFNode") ) {
 		my $node             = $object->getValue;
@@ -324,21 +327,23 @@ sub ITER_NTH_CHILD {
 		return undef if $n > $#$fieldDefinitions;
 
 		my $fieldName = $fieldDefinitions->[$n]->getName;
-		$parent = $object;
 		$object = $node->getField($fieldName);
 	} elsif ( $object->isa("X3DField") ) {
-		$parent = $object;
 		$object = $object->getValue;
 
 		if ( $object->isa("MFNode") ) {
 			return undef if $n > $#$object;
 			$object = $object->[$n];
 		}
+
 		#X3DError::Debug "X3DField", ref $object;
+	} else {
+		die;
 	}
 
+	X3DError::Debug $n, ref $object;
 	#X3DError::Debug $n, ref $parent, ref $object;
-	return $this->ITER( $n, parent => $parent, object => $object );
+	return $this->ITER( $n, $object, $parent );
 }
 
 #
@@ -349,44 +354,80 @@ sub ITER_NTH_CHILD {
 
 sub ITER_PARENT {
 	my ( $this, $iter ) = @_;
-	X3DError::Debug ref $iter->[2]->{parent}, ref $iter->[2]->{object};
 
 	my $n;
-	my $parent;
-	my $object = $iter->[2]->{parent};
+	my $object = $iter->[2]->{object};
+	my $parent = $iter->[2]->{parent};
 
-	return undef unless ref $object;
-	return if $object == $this->{root};
+	X3DError::Debug "object: ", ref $object;
+	X3DError::Debug "parent: ", ref $parent;
+	X3DError::Debug "  root: ", ref $this->{root};
+	X3DError::Debug $object->getValue->getName, $object->getValue->getType if $object->isa('SFNode');
+	X3DError::Debug $object->getType, $object->getName if $object->isa('X3DField');
+
+	return undef if $parent == $this->{root};
+	X3DError::Debug;
 
 	if ( $object->isa("SFNode") ) {
-		$object = $object->getParents;
-		
-		$parent = $object->getParents;
-		if ( $parent->isa("SFNode")) {
-			$n = Array::index([$parent->getFieldDefinitions], $object);
-		} elsif ( $parent->isa("MFNode")) {
-			$n = $parent->index($object);
-		}
-
-		X3DError::Debug $parent, $object;
 		die;
+		# 		$object = $object->getParents;
+		#
+		# 		$parent = $object->getParents;
+		# 		if ( $parent->isa("SFNode") ) {
+		# 			$n = Array::index( [ $parent->getFieldDefinitions ], $object );
+		# 		} elsif ( $parent->isa("MFNode") ) {
+		# 			$n = $parent->index($object);
+		# 		}
+		#
+		# 		X3DError::Debug $parent, $object;
 	} elsif ( $object->isa("X3DField") ) {
-		X3DError::Debug "X3DField", ref $object;
-		#X3DError::Debug ref $iter->[2]->{parent}, ref $iter->[2]->{object};
-		die;
+		if ($object->getType eq "SFNode") {
+			my ($node) = $parent->getValue->getParents;
+			
+			my $field = GetFieldFromSFNode($node, $parent);
+			X3DError::Debug $node->getType, $field->getName;
+	
+			$n = 0;
+			$object = $parent;
+			$parent = $field;
+		} else {
+			die;
+		}
 	} else {
 		X3DError::Debug "else", ref $object;
-	
+
 		die;
 	}
 
-	X3DError::Debug $n, ref $parent, ref $object;
-	return $this->ITER( $n, parent => $parent, object => $object );
+	X3DError::Debug $n, ref $object;
+	X3DError::Debug $n, $object->getValue->getName, $object->getValue->getType if $object->isa('SFNode');
+	X3DError::Debug $n, $object->getType, $object->getName if $object->isa('X3DField');
+
+	return if $object == $this->{root};
+	return $this->ITER( $n, $object, $parent );
+}
+
+sub GetFieldFromSFNode {
+	my $node   = shift;
+	my $sfnode = shift;
+
+	foreach my $field ( $node->getFields(TRUE) ) {
+ 		if ( $field->getType eq "SFNode" ) {
+ 			return $field if $field->getValue == $sfnode;
+ 		} elsif ( $field->getType eq "MFNode" ) {
+ 			foreach ( @{ $field->getValue } ) {
+ 				return $field if $_ == $sfnode;
+ 			}
+ 		}
+	}
+
+	return;
 }
 
 sub ITER {
-	my ( $this, $n, @values ) = @_;
-	%{ $this->{record} } = @values;
+	my ( $this, $n, $object, $parent ) = @_;
+	$this->{record}->{object} = $object;
+	$this->{record}->{parent} = $parent;
 	return [ $this->{stamp}, $n, $this->{record} ];
 }
 
@@ -397,6 +438,24 @@ sub ITER {
 #
 #sub REF_NODE { X3DError::Debug; X3DError::Debug "REF_NODE @_\n"; }
 #sub UNREF_NODE { X3DError::Debug; X3DError::Debug "UNREF_NODE @_\n"; }
+
+############################################################################
+############################################################################
+############################################################################
+
+sub set_children {
+	X3DError::Debug;
+	my ( $this, $field ) = @_;
+	$this->{root} = $field;
+	my $children = $field->getValue;
+
+	foreach ( 0 ... $#$children ) {
+		my $path = new Gtk2::TreePath($_);
+		my $iter = $this->get_iter($path);
+		$this->row_inserted( $path, $iter );
+		$this->row_has_child_toggled( $path, $iter );
+	}
+}
 
 1;
 __END__

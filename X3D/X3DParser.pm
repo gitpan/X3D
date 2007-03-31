@@ -1,4 +1,4 @@
- package X3DParser;
+package X3DParser;
 use strict;
 use warnings;
 
@@ -108,8 +108,8 @@ sub getError {
 
 	X3DError::carp "*" x 80;
 	X3DError::carp "Parser error at - line $lineNumber:";
-	X3DError::carp $`;
-	X3DError::carp $';
+	X3DError::carp $`;    # $`
+	X3DError::carp $';    # $'
 	X3DError::carp "$line";
 	X3DError::carp " " x ( $pos - $start ) . "^";
 	X3DError::carp $@;
@@ -651,7 +651,7 @@ sub node {
 			my $comments = $this->comments;
 			my $sfnode = $this->getScene->createNode( $type, $nodeNameId, $comments );
 			#X3DError::Debug $sfnode->getReferenceCount;
-			
+
 			if ( ref $sfnode ) {
 				my $node = $sfnode->getValue;
 				my $fields;

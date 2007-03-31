@@ -6,7 +6,7 @@ use warnings;
 
 use rlib "../";
 
-use base qw(SFValue);
+use base qw(SFScalar);
 
 use X3DGenerator;
 use X3DError;
@@ -27,8 +27,8 @@ sub AUTOLOAD {
 }
 
 use overload
-  "=="   => sub { $_[0]->getValue == $_[1]->getValue },
-  "!="   => sub { $_[0]->getValue != $_[1]->getValue },
+  "=="   => sub { $_[1] == $_[0]->getValue },
+  "!="   => sub { $_[1] != $_[0]->getValue },
   "bool" => sub { ref $_[0]->getValue },
   '""' => \&toString,
   ;
@@ -36,22 +36,22 @@ use overload
 sub copy {
 	my $this = shift;
 	my $sfnode = $this->new( $this->{value} );
-	$sfnode->addParents(@_);
 	return $sfnode;
 }
 
-sub deepCopy { die "SFNode::deepCopy not implemented yet" }
+sub setValue {
+	my $this = shift;
+	$this->{value} = shift || 0;
+}
 
 sub toString {    #X3DError::Debug;
 	return $_[0]->getValue || $X3DGenerator::NULL;
 }
 
-sub DESTROY {
-	0;
-}
-
 1;
 __END__
+
+sub deepCopy { die "SFNode::deepCopy not implemented yet" }
 
 sub copy {
 	my $this = shift;

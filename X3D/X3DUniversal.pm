@@ -11,8 +11,8 @@ use X3DError;
 #use Scalar::Util::Clone qw(clone);
 
 sub new {
-	my $self = shift;
-	my $type = shift;
+	my $self  = shift;
+	my $type  = shift;
 	my $class = ref($self) || $self;
 
 	my $this = bless $type, $class;
@@ -67,8 +67,8 @@ sub _get_methods {
 
 sub DESTROY {    #X3DError::Debug ref $_[0];
 	my $this = shift;
-	return Scalar::Util::reftype($this) eq "REF";
-	$this->call("dispose") if keys %$this;
+	#X3DError::Debug $this->getType;
+	$this->call("dispose");
 	0;
 }
 

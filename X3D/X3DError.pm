@@ -1,6 +1,6 @@
 package X3DError;
 use strict;
-use warnings;
+no warnings;
 no strict 'refs';
 
 use Carp qw(croak);

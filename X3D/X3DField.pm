@@ -13,18 +13,22 @@ use X3DGenerator;
 
 sub create {
 	my $this = shift;
-	@$this{ "accessType", "name", "value", "comment" } = @_;
+	
+	@$this{ "node", "accessType", "name", "value", "comment" } = @_;
+
 	$this->{update}         = FALSE;
 	$this->{callbacks}      = {};
 	$this->{fieldCallbacks} = {};
 
-	$this->{value}->addParents($this) if $this->{value}->can("addParents");
+	#X3DError::Debug ref $this->{value} if $this->{value}->can("addParents");
 }
 
 sub copy {
 	my $this = shift;
-	$this->new( @$this{ "accessType", "name", "value", "comment" } );
+	$this->new( @$this{ "node", "accessType", "name", "value", "comment" } );
 }
+
+sub getNode { $_[0]->{node} }
 
 sub getAccessType { $_[0]->{accessType} }
 
@@ -32,8 +36,6 @@ sub isWritable { $_[0]->{accessType} & outputOnly }
 sub isReadable { $_[0]->{accessType} ^ inputOnly }
 
 sub getType { ref $_[0]->{value} }
-
-sub getParent { ( $_[0]->getParents )[0] }
 
 sub getValue { $_[0]->{value} }
 #sub get1Value { $_[0]->{value}->[ $_[1] ] }
@@ -43,9 +45,50 @@ sub setValue {
 	#X3DError::Debug ref $value;
 
 	$this->{update} = TRUE;
+	$this->removeChildParent;
 	$this->{value}->setValue( ref $value ? $value->getValue : $value );
+	$this->addChildParent;
 }
+
 #sub set1Value { $_[0]->{value}->[ $_[1] ] = $_[2] }
+
+sub addChildParent {
+	my ($this) = @_;
+
+	if ( $this->{value}->isa("SFNode") ) {
+		my $node = $this->{value}->getValue;
+		$node->addParents( $this->{node} ) if ref $node;
+		return;
+	}
+
+	if ( $this->{value}->isa("MFNode") ) {
+		foreach my $node ( map { $_->getValue } @{ $this->{value} } ) {
+			$node->addParents( $this->{node} ) if ref $node;
+		}
+		return;
+	}
+
+	return;
+}
+
+sub removeChildParent {
+	my ($this) = @_;
+
+	if ( $this->{value}->isa("SFNode") ) {
+		my $node = $this->{value}->getValue;
+		$node->removeParents( $this->{node} ) if ref $node;
+		return;
+	}
+
+	if ( $this->{value}->isa("MFNode") ) {
+		foreach my $node ( map { $_->getValue } @{ $this->{value} } ) {
+			$node->removeParents( $this->{node} ) if ref $node;
+		}
+		return;
+	}
+
+	return;
+}
 
 #registerFieldInterest
 # $field->addFieldCallback("callback", $node);

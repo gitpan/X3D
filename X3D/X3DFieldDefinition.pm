@@ -2,9 +2,9 @@ package X3DFieldDefinition;
 use strict;
 use warnings;
 
-#use rlib "./";
+use base qw(X3DObject);
 
-use base qw(X3DField);
+use X3DField;
 
 sub create {
 	my $this = shift;
@@ -12,11 +12,13 @@ sub create {
 }
 
 sub getField {
-	my ( $this, $parent ) = @_;
-	my $field = new X3DField( $this->{accessType}, $this->{name}, $this->{value}->copy );
-	$field->addParents($parent);
+	my ( $this, $node ) = @_;
+	my $field = new X3DField( $node, $this->{accessType}, $this->{name}, $this->{value}->copy );
 	return $field;
 }
+
+sub getAccessType { $_[0]->{accessType} }
+sub getValue      { $_[0]->{value} }
 
 sub toString {
 	my $this   = shift;

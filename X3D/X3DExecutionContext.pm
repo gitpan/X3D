@@ -42,7 +42,7 @@ sub getWorldURL             { $_[0]->worldURL->getValue }
 sub createNode {
 	my ( $this, $nodeTypeName, $nodeName, $comments ) = @_;
 
-	my $node = eval { $nodeTypeName->new($nodeName, $comments) };
+	my $node = eval { $nodeTypeName->new($nodeName) };
 
 	if ( ref $node ) {
 		my $sfnode = new SFNode($node);
@@ -50,6 +50,7 @@ sub createNode {
 		$this->{nodesById}->{ $node->getId } = $sfnode;
 		$this->{namedNodes}->{$nodeName} = $sfnode if $nodeName;
 
+		$node->setComments(@$comments);
 		$node->call( "setBrowser", $this->getBrowser );
 		return $sfnode;
 	} else {

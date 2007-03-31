@@ -33,12 +33,12 @@ sub create {    #X3DError::Debug ref $_[0];
 	my $this = shift;
 
 	$this->{browser} = undef;
+	$this->{parents} = [];
 	$this->{fields}  = {};
 
 	foreach ( $this->getFieldDefinitions ) {
 		my $name  = $_->getName;
 		my $field = $_->getField($this);
-		$field->addParents($this);
 		$field->addFieldCallback( "_$name", $this ) if $this->can("_$name");
 		$this->{fields}->{$name} = $field;
 	}
@@ -71,10 +71,27 @@ sub getFields {
 	foreach ( $this->getFieldDefinitions ) {
 		push @$fields, $this->{fields}->{ $_->getName }
 		  if ( $_->getAccessType == inputOutput || $_->getAccessType == initializeOnly )
-		  && ( $_->getValue != $this->{fields}->{ $_->getName }->getValue || $all );
+		  && ( $all || $_->getValue != $this->{fields}->{ $_->getName }->getValue );
 	}
 
 	return wantarray ? @$fields : $fields;
+}
+
+sub addParents {
+	my ( $this, @parents ) = @_;
+	push @{ $_[0]->{parents} }, @parents;
+	#X3DError::Debug map { ref $_ } @{ $_[0]->{parents} } if ref($this) =~ /^MF/;
+}
+
+sub removeParents {
+	my ( $this, @parents ) = @_;
+	X3DError::Debug @parents;
+}
+
+sub getParents {
+	my $this    = shift;
+	my $parents = $this->{parents};
+	return @$parents;
 }
 
 sub processEvents {    #X3DError::Debug;

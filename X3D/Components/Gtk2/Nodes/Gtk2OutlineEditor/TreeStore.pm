@@ -20,23 +20,5 @@ use Gtk2OutlineEditor::TreeModel;
 use Glib::Object::Subclass Gtk2OutlineEditor::TreeModel::,
   ;
 
-############################################################################
-############################################################################
-############################################################################
-
-sub set_children {
-	X3DError::Debug;
-	my ( $this, $field ) = @_;
-	$this->{root} = $field;
-	my $children = $field->getValue;
-
-	foreach ( 0 ... $#$children ) {
-		my $path = new Gtk2::TreePath($_);
-		my $iter = $this->get_iter($path);
-		$this->row_inserted( $path, $iter );
-		$this->row_has_child_toggled( $path, $iter );
-	}
-}
-
 1;
 __END__
