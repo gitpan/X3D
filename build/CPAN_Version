@@ -1,0 +1,54 @@
+#!/usr/bin/perl
+#package Perl_Run
+use strict;
+use File::Basename "dirname";
+
+our $VERSION = 0.002;
+our $DEBUG = 1;
+
+my $console = "$ENV{HOME}/.xsession-errors";
+open CONSOLE, ">>$console";
+
+my $package  = shift @ARGV;
+my $count    = shift @ARGV;
+my @manifest = <STDIN>;
+chomp @manifest;
+my $previousRoot = "../test/cpan/$package";
+
+system "mkdir -p '$previousRoot'";
+
+print CONSOLE `pwd`      if $DEBUG > 1;
+print CONSOLE "$count\n" if $DEBUG > 1;
+
+sub main {
+   my $file = shift;
+   $file =~ s/\t.*//;
+   my $previous = "$previousRoot/$file";
+   my $folder   = dirname($previous);
+   print CONSOLE "$file\n" if $DEBUG > 1;
+
+   system "mkdir -p '$folder'"   unless -e $folder;
+   system "cp '$file' '$folder'" unless -e $previous;
+
+   my $originalFile = `cat '$file'`;
+   my $previousFile = `cat '$previous'`;
+
+   return if $originalFile eq $previousFile;
+   print CONSOLE "$file\n" if $DEBUG > 0;
+
+	$originalFile =~ s/(\$VERSION\s*=\s*)([.0-9]*)/$1.sprintf("%g", $2+$count)/e;
+
+	open FILE, ">$file";
+	print FILE $originalFile;
+	close FILE;
+
+   system "cp '$file' '$folder'";
+}
+
+&main($_) foreach @manifest;
+
+END {
+   close CONSOLE;
+}
+
+__END__

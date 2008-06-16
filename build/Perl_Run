@@ -1,0 +1,68 @@
+#!/usr/bin/perl
+#package Perl_Run
+use strict;
+
+our $VERSION = 0.001;
+our $DEBUG   = 0;
+
+use Benchmark ':hireswallclock';
+use Unicode::String qw(utf8);
+
+my $console = "$ENV{HOME}/.xsession-errors";
+open CONSOLE, ">>$console";
+
+sub main {
+   my $file    = shift;
+   my $command = "perl";
+
+   if ( $file =~ m|(.*?/lib/)|o ) {
+      $command .= qq| -I '$1'|;
+   }
+
+   $command .= " '$file' 2>&1";
+
+   my $count = 1;
+   print CONSOLE "Benchmark $file . . .\n";
+   my $t = timeit(
+      $count, qq(
+		&run("$command");
+	)
+   );
+   print CONSOLE timestr($t), "\n";
+}
+
+sub run {
+   my $command = shift;
+   print "$command \n" if $DEBUG;
+
+   my $output = qx($command);
+   $output =~ s/(?:Constant )?[Ss]ubroutine.*?redefined.*?\n//sgo
+     ;    # remove 'Subroutine ??? redefined at ??? line ???.' warning
+  
+  $output = utf8($output);
+  $output->stringify_as("latin1");
+  print $output->as_string;
+}
+
+&main($_) foreach @ARGV;
+
+END {
+   close CONSOLE;
+}
+
+__END__
+	my $count = 1;
+	system "make manifest 2>&1 | grep OK";
+	system "perl Makefile.PL | grep OK";
+
+NEdit -> Preferences -> Default Settings -> Customize Menus -> Shell Menu
+Shell Menu:
+
+Menu Entry: 		Perl>Run
+Command Input: 	none
+Command Output: 	dialog
+
+Save file before executing command: 	true
+
+Shell Command to Execute:
+/home/holger/perl/cpan/X3D/nedit/perlrun '%'

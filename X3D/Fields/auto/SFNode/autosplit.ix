@@ -1,5 +1,0 @@
-# Index created by AutoSplit for SFNode.pm
-#    (file acts as timestamp)
-package SFNode;
-sub copy  ;
-1;
