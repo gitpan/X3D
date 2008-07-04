@@ -1,0 +1,15 @@
+#!/usr/bin/perl
+use strict;
+
+our $VERSION = 0.001;
+our $DEBUG   = 0;
+
+use Unicode::String qw(utf8);
+
+while (<STDIN>) {
+   my $output = utf8($_);
+   $output->stringify_as("latin1");
+   print $output->as_string;
+}
+
+__END__

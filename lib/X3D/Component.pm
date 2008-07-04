@@ -3,7 +3,7 @@ use X3D::Perl;
 
 our $VERSION = '0.002';
 
-use X3D '
+use X3D::Package '
 X3DComponent : X3DBaseNode {
   SFString [] name  ""
   MFString [] nodeTypeName []

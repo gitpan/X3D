@@ -7,7 +7,7 @@ BEGIN {
 }
 
 
-use X3D 'TestType {}';
+use X3D::Package 'TestType {}';
 
 sub new { shift->X3DUniversal::new }
 

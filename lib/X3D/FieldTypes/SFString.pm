@@ -2,7 +2,7 @@ package X3D::FieldTypes::SFString;
 
 our $VERSION = '0.01';
 
-use X3D 'SFString : X3DField { "" }';
+use X3D::Package 'SFString : X3DField { "" }';
 
 use base 'X3D::BaseFieldTypes::Scalar';
 

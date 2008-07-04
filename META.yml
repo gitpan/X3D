@@ -16,7 +16,6 @@ requires:
     Exporter:                      0
     File::Temp:                    0
     Hash::NoRef:                   0
-    Inline:                        0
     integer:                       0
     Math::Complex:                 0
     Math::Quaternion:              0
@@ -36,6 +35,7 @@ requires:
     UNIVERSAL:                     0
     Want:                          0
     warnings:                      0
+    X3D::Values::Int32:            0
 
 distribution_type: module
 generated_by: ExtUtils::MakeMaker version 6.30_01

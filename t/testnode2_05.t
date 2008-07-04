@@ -20,7 +20,7 @@ is $testNode->isa, '1 2';
 #isa_ok $testNode->isa, '';
 #isa_ok $testNode->can, '';
 
-is $testNode, 'DEF ' . $testNode->getName . ' TestNode { }';
+is $testNode, 'TestNode { }';
 
 my $hash = {};
 ok 0 == scalar keys %$hash;

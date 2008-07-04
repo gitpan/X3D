@@ -2,24 +2,31 @@ package X3D::FieldTypes::SFInt32;
 
 our $VERSION = '0.01';
 
-use X3D 'SFInt32 : X3DField { 0 }';
-
-use Math::BigInt lib => 'GMP';
+use X3D::Package 'SFInt32 : X3DField { 0 }';
 
 use base 'X3D::BaseFieldTypes::Scalar';
 
+sub create {
+   my ($this) = @_;
+   $this->{value} = $this->getInitialValue->getClone;
+   return;
+}
+
 sub setValue {
-	my ( $this, $value ) = @_;
-	
-	my $int32 = Math::BigInt->new(
-		defined $value ? eval { no warnings; int($value) } || 0 : $this->getDefaultValue
-	);
-	
-	$this->X3DField::setValue($int32);
+   my ( $this, $value ) = @_;
+   my $scalar = $this->{value};
+
+   $scalar->setValue(
+      defined $value
+      ? $value
+      : $this->getDefaultValue
+   );
+
+   $this->X3DField::setValue($scalar);
 }
 
 sub toString {
-	return sprintf X3DGenerator->INT32, $_[0]->getValue;
+   return sprintf X3DGenerator->INT32, $_[0]->getValue;
 }
 
 1;

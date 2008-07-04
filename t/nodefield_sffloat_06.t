@@ -7,6 +7,7 @@ BEGIN {
 	$| = 1;
 	chdir 't' if -d 't';
 	unshift @INC, '../lib';
+	use_ok 'X3D';
 	use_ok 'TestNodeFields';
 }
 
@@ -89,7 +90,7 @@ is $testNode->sffloat |= 1, 3;
 is $testNode->sffloat &= 2, 2;
 is $testNode->sffloat ^= 3, 1;
 is - $testNode->sffloat, -1;
-is $testNode->sffloat = ~$testNode->sffloat, '4294967294';
+is $testNode->sffloat = ~$testNode->sffloat, ~1;
 ok $testNode->sffloat = 4294967294;
 is ++$testNode->sffloat, 4294967295;
 

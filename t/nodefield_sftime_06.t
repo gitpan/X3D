@@ -7,6 +7,7 @@ BEGIN {
 	$| = 1;
 	chdir 't' if -d 't';
 	unshift @INC, '../lib';
+	use_ok 'X3D';
 	use_ok 'TestNodeFields';
 }
 
@@ -91,7 +92,7 @@ is $testNode->sftime |= 1, 3;
 is $testNode->sftime &= 2, 2;
 is $testNode->sftime ^= 3, 1;
 is - $testNode->sftime, -1;
-is $testNode->sftime = ~$testNode->sftime, '4294967294';
+is $testNode->sftime = ~$testNode->sftime, ~1;
 $testNode->sftime = 4294967294;
 is ++$testNode->sftime, 4294967295;
 

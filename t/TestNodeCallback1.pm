@@ -7,7 +7,7 @@ BEGIN {
 	unshift @INC, '../lib';
 }
 
-use X3D 'TestNode : X3DNode {
+use X3D::Package 'TestNode : X3DNode {
   SFString  [in,out]      set_sfstring1 ""
   SFString  [in,out]      set_sfstring2 ""
   SFString  [in,out]      set_sfstring3 ""

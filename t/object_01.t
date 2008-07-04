@@ -7,8 +7,7 @@ BEGIN {
 	$| = 1;
 	chdir 't' if -d 't';
 	unshift @INC, '../lib';
-	use_ok 'X3D::Generator';
-	use_ok 'X3D::Object';
+	use_ok 'X3D';
 }
 
 ok new X3DObject;

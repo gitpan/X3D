@@ -2,7 +2,7 @@ package X3D::FieldTypes::SFRotation;
 
 our $VERSION = '0.012';
 
-use X3D 'SFRotation : X3DField { 0 0 1 0 }';
+use X3D::Package 'SFRotation : X3DField { 0 0 1 0 }';
 
 use overload
   '~' => sub { ~$_[0]->getValue },

@@ -1,6 +1,6 @@
 package X3D::Object;
 
-use X3D 'X3DObject ()';
+use X3D::Package 'X3DObject ()';
 
 our $VERSION = '0.014';
 

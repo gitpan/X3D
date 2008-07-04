@@ -26,4 +26,17 @@ print $var + 0.8;
 
 1;
 __END__
+
 Sort::Naturally 
+
+use Math::Int64;
+my $a = Math::Int32::int32(1);
+
+timethis( -6, sub { $a|=1 } );
+timethis( -6, sub { $b|=1 } );
+
+:
+my $a = Math::Int32::int32(1);
+timethis( -6, sub { $a++ } );
+timethis for 6: 6.04528 wallclock secs ( 6.05 usr +  0.00 sys =  6.05 CPU) @ 1308656.86/s (n=7917374) 
+

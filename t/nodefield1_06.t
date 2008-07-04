@@ -316,7 +316,7 @@ isa_ok $testNode->sfcolorrgba->getValue, 'X3DColorRGBA';
 is ref $testNode->sfdouble->getValue, '';
 is ref $testNode->sffloat->getValue,  '';
 isa_ok $testNode->sfimage->getValue, 'X3DImage';
-is ref $testNode->sfint32->getValue, '';
+isa_ok $testNode->sfint32->getValue, 'X3DInt32';
 is $testNode->sfnode->getValue,         undef;
 isa_ok $testNode->sfrotation->getValue, 'X3DRotation';
 is ref $testNode->sfstring->getValue, '';

@@ -2,7 +2,7 @@ package X3D::FieldTypes::MFBool;
 
 our $VERSION = '0.01';
 
-use X3D 'MFBool : X3DArrayField { [] }';
+use X3D::Package 'MFBool : X3DArrayField { [] }';
 
 sub toString {
 	my ($this) = @_;

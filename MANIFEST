@@ -1,3 +1,4 @@
+.build
 build/Add_New_Directoy
 build/CPAN_Build
 build/CPAN_Install
@@ -9,6 +10,7 @@ build/Perl_Run
 build/PS_To_PDF
 build/To_PNG
 build/Unmount_ISO
+build/utf8_to_latin1
 lib/X3D.pm
 lib/X3D/Array.pm
 lib/X3D/ArrayField.pm
@@ -78,7 +80,6 @@ lib/X3D/Generator.pm
 lib/X3D/Hash.pm
 lib/X3D/Math.pm
 lib/X3D/Message.pm
-lib/X3D/Name.pm
 lib/X3D/Namespace.pm
 lib/X3D/Object.pm
 lib/X3D/Package.pm
@@ -109,19 +110,15 @@ lib/X3D/Universal.pm
 lib/X3D/Values.pm
 lib/X3D/Values/Color.pm
 lib/X3D/Values/ColorRGBA.pm
-lib/X3D/Values/CPP.map
 lib/X3D/Values/Image.pm
-lib/X3D/Values/Int32.pm
 lib/X3D/Values/Rotation.pm
 lib/X3D/Values/Tie/Rotation.pm
 lib/X3D/Values/Vec2.pm
 lib/X3D/Values/Vec3.pm
 lib/X3D/Values/Vec4.pm
 lib/X3D/Values/Vector.pm
-lib/X3D/X.pm
 Makefile.PL
 MANIFEST			This list of files
-META.yml
 t/AAA_01.t
 t/array_01.t
 t/array_02.t
@@ -135,6 +132,8 @@ t/benchmark_02.t
 t/concept_00.t
 t/constants1_00.t
 t/constants_00.t
+t/dispose_01.t
+t/dispose_02.t
 t/environment_01.t
 t/field_01.t
 t/field_02.t
@@ -157,9 +156,6 @@ t/hierarchy_01.t
 t/length_01.t
 t/math_01.t
 t/memory_01.t
-t/name_01.t
-t/name_02.t
-t/name_03.t
 t/namespace_01.t
 t/namespace_02.t
 t/node2_03.t
@@ -173,6 +169,8 @@ t/node_02.t
 t/node_03.t
 t/nodefield1_06.t
 t/nodefield_06.t
+t/nodefield_07.t
+t/nodefield_08.t
 t/nodefield_hierarchy_06.t
 t/nodefield_mfvec4d_06.t
 t/nodefield_mfvec4d_07.t
@@ -194,7 +192,6 @@ t/nodefield_sfvec3d_06.t
 t/nodefield_sfvec3f_06.t
 t/nodefield_sfvec4d_06.t
 t/nodefield_sfvec4f_06.t
-t/o/dispose_01.t
 t/o/dispose_02.t
 t/o/dispose_03.t
 t/o/memory_04.t
@@ -217,6 +214,7 @@ t/parseFieldDescription_04.t
 t/perl_01.t
 t/pod_00.t
 t/scene_00.t
+t/sfint32.t
 t/sfnode_01.t
 t/test_01.t
 t/testnode2_05.t
@@ -231,7 +229,7 @@ t/testNodeCallback1_03.t
 t/testNodeCallback1_04.t
 t/testNodeCallback1_05.t
 t/TestNodeFields.pm
-t/TestNodeWeed.pm
+t/TestNodeX3D.pm
 t/TestType.pm
 t/time_01.t
 t/time_02.t
@@ -241,14 +239,15 @@ t/values_array_01.t
 t/values_color_01.t
 t/values_colorRGBA_01.t
 t/values_image_01.t
-t/values_int32_01.t
 t/values_notations_01.t
 t/values_rotation_01.t
 t/values_vec2_01.t
 t/values_vec3_01.t
 t/values_vec4_01.t
 t/weed_01.t
+t/X3D_01.t
 t/X3D_Core_01.t
 t/X3DNode_01.t
 t/X3DNode_02.t
 t/ZZZ_01.t
+META.yml                                 Module meta-data (added by MakeMaker)

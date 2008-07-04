@@ -1,6 +1,6 @@
 package X3D::Array;
 
-use X3D 'X3DArray [ ]', 'isArray';
+use X3D::Package 'X3DArray [ ]', 'isArray';
 
 our $VERSION = '0.011';
 
@@ -29,12 +29,13 @@ sub getClone {
 }
 
 use overload '<=>' => sub {
-	my ( $a, $b, $r, $c ) = @_;
+	my ( $a, $b, $r) = @_;
 	( $a, $b ) = ( $b, $a ) if $r;
 
 	return $a <=> @$b unless isArray($a);    # [] <=> scalar
 	return @$a <=> $b unless isArray($b);    # [] <=> scalar
 
+	my $c;
 	return $c if $c = $#$a <=> $#$b;
 
 	for ( my $i = 0 ; $i < @$a ; ++$i ) {
@@ -45,12 +46,14 @@ use overload '<=>' => sub {
 };
 
 use overload 'cmp' => sub {
-	my ( $a, $b, $r, $c ) = @_;
+	my ( $a, $b, $r ) = @_;
+
 	( $a, $b ) = ( $b, $a ) if $r;
 
 	return $a cmp "$b" unless isArray($a);    # [] <=> scalar
 	return "$a" cmp $b unless isArray($b);    # [] <=> scalar
 
+	my $c;
 	return $c if $c = $#$a <=> $#$b;
 
 	for ( my $i = 0 ; $i < @$a ; ++$i ) {

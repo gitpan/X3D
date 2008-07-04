@@ -4,52 +4,73 @@ use Test::More no_plan;
 use strict;
 
 BEGIN {
-	$| = 1;
-	chdir 't' if -d 't';
-	unshift @INC, '../lib';
-	use_ok 'X3D';
-	use_ok 'TestNodeFields';
+   $| = 1;
+   chdir 't' if -d 't';
+   unshift @INC, '../lib';
+   use_ok 'X3D';
+   use_ok 'TestNodeFields';
 }
 
-
-__END__
-
 {
+   ok my $testNode = new SFNode( new TestNode('TestName1') );
 
-	ok my $testNode = new SFNode( new TestNode('TestName1') );
+   sub set_child {
+      my ( $this, $value ) = @_;
 
-	sub set_children {
-		my ($this) = @_;
+      $this->sfnode = $value;
+      $this->mfnode = $value;
+   }
 
-		$this->sfnode = $this;
-		$this->mfnode = $this;
-	}
+   is $testNode->getValue->getReferenceCount, 2;
 
-	set_children($testNode);
+   set_child( $testNode, $testNode );
 
-	#is $testNode->getValue->getReferenceCount, 2;
+   is $testNode->getValue->getReferenceCount, 4;
+
+   set_child( $testNode, undef );
+
+   is $testNode->getValue->getReferenceCount, 2;
 }
 
 print ">>>END1";
 
 {
 
-	ok my $node = new TestNode('TestName2');
-	ok my $testNode = new SFNode( $node );
+   ok my $testNode = new SFNode( new TestNode('TestName2') );
 
-	sub set_children2 {
-		my ($this) = @_;
+   sub set_child2 {
+      my ( $this, $value ) = @_;
 
-		$this->sfnode = $this;
-		$this->mfnode = $this;
-	}
+      $this->sfnode = $value;
+      $this->mfnode = $value;
+   }
 
-	set_children2($testNode);
+   set_child2( $testNode, $testNode );
 
-	#is $testNode->getValue->getReferenceCount, 3;
-	#is $testNode->mfnode->[0]->getValue->getReferenceCount, 4;
-	is $testNode->mfnode->[0]->getValue->getId, $testNode->getValue->getId;
+   is $testNode->getValue->getReferenceCount, 4;
+   ok $testNode->mfnode->[0] == $testNode;
+
+   is $testNode->sfnode->getReferenceCount, 4;
+   is $testNode->mfnode->[0]->getReferenceCount, 4;
+   is $testNode->mfnode->[0]->getId,             $testNode->getValue->getId;
+
+   my $node = $testNode->sfnode;
+   ok $node->isa('TestNode');
+   ok $node->isa('BaseNode');
+
 }
+
+{
+   ok my $testNode = new SFNode( new TestNode('TestName3') );
+   foreach ( 1 ... 10 ) {
+      my $node2 = new SFNode( new TestNode('node2') );
+      $testNode->sfnode = $node2;
+      $testNode->mfnode = $node2;
+   }
+}
+
+__END__
+
 
 print ">>>END2";
 

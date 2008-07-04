@@ -2,7 +2,7 @@ package X3D::FieldTypes::SFNode;
 
 our $VERSION = '0.016';
 
-use X3D 'SFNode : X3DField { NULL }';
+use X3D::Package 'SFNode : X3DField { NULL }';
 
 use overload
   'int' => sub { $_[0]->getValue ? 1 : 0 },
@@ -18,33 +18,37 @@ use overload
 use Want ();
 
 sub AUTOLOAD : lvalue {    #X3DMessage->Debug( @_, our $AUTOLOAD );
-	my $this = shift;
-	my $name = substr our $AUTOLOAD, rindex( $AUTOLOAD, ':' ) + 1;
+   my $this = shift;
+   my $name = substr our $AUTOLOAD, rindex( $AUTOLOAD, ':' ) + 1;
 
-	$this = $this->getValue;
-	X3DMessage->UnknownField( 1, $this, $AUTOLOAD ), return unless ref $this;
+   # #################################################
+   # this function is also defined in FieldDefinition.pm
+   # #################################################
 
-	#X3DMessage->DirectOutputIsFALSE, return unless $this->{directOutput};
+   $this = $this->getValue;
+   X3DMessage->UnknownField( 1, $this, $AUTOLOAD ), return unless ref $this;
 
-	if ( Want::want('RVALUE') ) {
-		my $field = $this->getField($name);
-		Want::rreturn $field if Want::want 'ARRAY';
-		Want::rreturn $field->getClone->getValue;
-	}
+   #X3DMessage->DirectOutputIsFALSE, return unless $this->{directOutput};
 
-	if ( Want::want('ASSIGN') ) {
-		$this->getField($name)->setValue( Want::want('ASSIGN') );
-		Want::lnoreturn;
-	}
+   if ( Want::want('RVALUE') ) {
+      my $field = $this->getField($name);
+      Want::rreturn $field if Want::want 'ARRAY';
+      Want::rreturn $field->getClone->getValue;
+   }
 
-	if ( Want::want('CODE') ) {
-		my $value = $this->getField($name)->getClone->getValue;
-		return $value;
-	}
+   if ( Want::want( 'LVALUE', 'ASSIGN' ) ) {
+      $this->getField($name)->setValue( Want::want('ASSIGN') );
+      Want::lnoreturn;
+   }
 
-	return $this->getFields->getField( $name, $this ) if Want::want('REF');
+   if ( Want::want('CODE') ) {
+      my $value = $this->getField($name)->getClone->getValue;
+      return $value;
+   }
 
-	$this->getFields->getTiedField( $name, $this )    # für: += ++ ...
+   return $this->getFields->getField($name) if Want::want('REF');
+
+   $this->getFields->getTiedField($name)    # für: += ++ ...
 }
 
 #sub new {  X3DMessage->Debug;
@@ -53,46 +57,56 @@ sub AUTOLOAD : lvalue {    #X3DMessage->Debug( @_, our $AUTOLOAD );
 #sub getClone { $_[0]->new( $_[0]->getValue ) }
 
 sub getCopy {
-	my $value = $_[0]->getValue;
-	return $_[0]->new( defined $value ? $value->getCopy : $value );
+   my $value = $_[0]->getValue;
+   return $_[0]->new( defined $value ? $value->getCopy : $value );
 }
 
 sub getInitialValue { $_[0]->getDefinition->getValue }
 
 sub setValue {
-	my ( $this, $value ) = @_;
+   my ( $this, $value ) = @_;
 
-	my $node = $this->getValue;
-	$node->getParents->remove($this) if ref $node;
+   my $node = $this->getValue;
+   $node->getParents->remove($this) if ref $node;
 
-	$value = $value->getValue
-	  if UNIVERSAL::isa( $value, 'SFNode' );
+   $value = $value->getValue
+     if UNIVERSAL::isa( $value, 'SFNode' );
 
-	if ( UNIVERSAL::isa( $value, 'X3DBaseNode' ) )
-	{
-		$value->getParents->add($this);
-		$this->X3DField::setValue($value);
-	}
-	elsif ( !defined $value )
-	{
-		$this->X3DField::setValue($value)
-	}
-	else
-	{
-		X3DMessage->ValueHasToBeAtLeastOfTypeX3DNode( 1, $this, $value );
-	}
+   if ( UNIVERSAL::isa( $value, 'X3DBaseNode' ) ) {
+      $value->getParents->add($this);
+      $this->X3DField::setValue($value);
+   }
+   elsif ( !defined $value ) {
+      $this->X3DField::setValue($value);
+   }
+   else {
+      X3DMessage->ValueHasToBeAtLeastOfTypeX3DNode( 1, $this, $value );
+   }
 
-	$node->dispose if ref $node;
-	return;
+   $node->dispose if $node;
+
+   return;
 }
 
 sub toString { sprintf "%s", $_[0]->getValue || X3DGenerator->NULL }
 
-sub DESTROY {    #X3DMessage->Debug(undef, $_[0]->getId, $_[0]->getName);
-	my $this = shift;
-	#print new X3DHash $this;
-	$this->setValue(undef);
-	return;
+sub dispose {    #X3DMessage->Debug();
+   my ( $this, $nodeToDispose ) = @_;
+
+   if ( $this->getParents ) {
+      foreach ( @{ $this->getParents } ) {
+         return 1 if $_->dispose($nodeToDispose);
+      }
+      return 0;
+   }
+
+   return 1;
+}
+
+sub DESTROY {    #X3DMessage->Debug();
+   my $this = shift;
+   $this->setValue(undef);
+   return;
 }
 
 1;

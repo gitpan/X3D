@@ -2,7 +2,7 @@ package X3D::FieldTypes::SFBool;
 
 our $VERSION = '0.009';
 
-use X3D 'SFBool : X3DField { FALSE }';
+use X3D::Package 'SFBool : X3DField { FALSE }';
 
 use base 'X3D::BaseFieldTypes::Scalar';
 

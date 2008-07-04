@@ -7,7 +7,7 @@ use Carp ();
 use Hash::NoRef;
 
 #use X3D::Math;
-use X3D::Package;
+use X3D::Package 'X3DUniversal { }', 'getId getReferenceCount';
 
 use overload
   'bool' => sub { YES },
@@ -23,16 +23,6 @@ use overload
 
   '""' => 'toString',
   ;
-
-#sub import {
-#	my $namespace = shift;
-#	return unless @_;
-#	X3DPackage::createType( $namespace, scalar caller, 'X3DUniversal', @_ );
-#}
-
-X3DPackage::createType( __PACKAGE__, 'X3DUniversal',
-   'X3DUniversal { }', 'getId getReferenceCount'
-);
 
 sub new {
    my $packageName = shift->X3DPackage::getName;

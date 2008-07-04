@@ -1,5 +1,5 @@
 package X3D::Tie::Value::Vector;
-use X3D;
+use X3D::Perl;
 
 our $VERSION = '0.009';
 

@@ -6,10 +6,11 @@ our $VERSION = 0.001;
 our $DEBUG   = 0;
 
 use Benchmark ':hireswallclock';
-use Unicode::String qw(utf8);
 
 my $console = "$ENV{HOME}/.xsession-errors";
 open CONSOLE, ">>$console";
+
+#print "Perl_Run\n";
 
 sub main {
    my $file    = shift;
@@ -39,9 +40,7 @@ sub run {
    $output =~ s/(?:Constant )?[Ss]ubroutine.*?redefined.*?\n//sgo
      ;    # remove 'Subroutine ??? redefined at ??? line ???.' warning
   
-  $output = utf8($output);
-  $output->stringify_as("latin1");
-  print $output->as_string;
+  print $output;
 }
 
 &main($_) foreach @ARGV;

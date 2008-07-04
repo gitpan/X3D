@@ -2,7 +2,7 @@ package X3D::FieldTypes::SFVec4d;
 
 our $VERSION = '0.009';
 
-use X3D 'SFVec4d : X3DField { 0 0 0 0 }';
+use X3D::Package 'SFVec4d : X3DField { 0 0 0 0 }';
 
 use base 'X3D::BaseFieldTypes::Vector';
 

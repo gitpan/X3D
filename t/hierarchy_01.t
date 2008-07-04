@@ -18,7 +18,7 @@ use strict;
 print reverse $_->getHierarchy foreach grep { $_->can('getHierarchy') } @$X3D;
 
 package xxx;
-use X3D 'fds';
+use X3D::Package "fds";
 
 print fds->X3DPackage::toString;
 1;

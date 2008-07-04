@@ -12,7 +12,7 @@ BEGIN {
 }
 
 X3DGenerator->setOutputStyle("COMPACT");
-ok my $X3D = new X3D;
+ok my $X3D = new X3DTest;
 ok my $id   = $X3D->size->getId;
 ok my $size = $X3D->size;
 #ok $X3D->size->getId != $size->getId;

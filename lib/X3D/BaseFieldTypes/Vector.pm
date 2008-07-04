@@ -8,17 +8,9 @@ use base 'X3D::BaseFieldTypes::Scalar';
 use overload
   '0+' => 'length',
 
-  '~' => sub { ~$_[0]->{value} },
-
   '&' => sub { $_[2] ? $_[1] & $_[0]->getValue : $_[0]->getValue & $_[1] },
   '|' => sub { $_[2] ? $_[1] | $_[0]->getValue : $_[0]->getValue | $_[1] },
   '^' => sub { $_[2] ? $_[1] ^ $_[0]->getValue : $_[0]->getValue ^ $_[1] },
-
-  'neg' => sub { -$_[0]->{value} },
-
-  #'++' => sub { my $value = $_[0]->getValue; ++$value; $_[0] },
-  #'+=' => sub { print "+="; $_[0]->getValue->setValue($_[0]->getValue + $_[1]); $_[0] },
-  #'-=' => sub { print "-="; $_[2] ? $_[1] - $_[0]->getValue : $_[0]->getValue - $_[1] },
 
   '.' => sub { $_[2] ? $_[1] . $_[0]->getValue : $_[0]->getValue . $_[1] },
   'x' => sub { $_[2] ? $_[1] x $_[0]->getValue : $_[0]->getValue x $_[1] },

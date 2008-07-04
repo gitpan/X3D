@@ -322,7 +322,7 @@ sub sfimageValues {
 sub sfint32Value {
 	my ($string) = @_;
 	my $int32 = &int32($string);
-	return $int32 if defined $int32;
+	return new X3DInt32 $int32 if defined $int32;
 	return;
 }
 

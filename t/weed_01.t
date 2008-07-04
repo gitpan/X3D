@@ -19,5 +19,7 @@ ok 'X3D'->VERSION;
 eval { new main };
 ok not @!;
 
+print new X3D;
+
 __END__
 

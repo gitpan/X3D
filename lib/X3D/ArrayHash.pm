@@ -2,7 +2,7 @@ package X3D::ArrayHash;
 
 our $VERSION = '0.002';
 
-use X3D 'X3DArrayHash : X3DArray X3DHash ()';
+use X3D::Package 'X3DArrayHash : X3DArray X3DHash ()';
 
 use overload
   'bool' => sub { $_[0]->getArray or $_[0]->getHash ? YES : NO },

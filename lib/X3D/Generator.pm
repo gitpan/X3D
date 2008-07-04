@@ -2,9 +2,10 @@ package X3D::Generator;
 
 our $VERSION = '0.011';
 
-use X3D 'X3DGenerator';
+use X3D::Package 'X3DGenerator';
 
 use X3D::Symbols;
+use X3D::Math;
 
 our $OutputStyle;
 
@@ -36,6 +37,7 @@ use constant FALSE => $_FALSE_;
 use constant NULL  => $_NULL_;
 
 use constant DEF => $_DEF_;
+use constant USE => $_USE_;
 
 use constant ROUTE => $_ROUTE_;
 use constant TO    => $_TO_;
@@ -65,6 +67,7 @@ sub INT32  { $INT32 }
 sub FLOAT  { $FLOAT }
 sub DOUBLE { $DOUBLE }
 sub STRING { $STRING }
+
 # indent
 sub _INDENT  { $INDENT_CHAR x $INDENT_INDEX }
 sub _TINDENT { $TINDENT_CHAR x $INDENT_INDEX }
@@ -76,28 +79,28 @@ sub _TINDENT { $TINDENT_CHAR x $INDENT_INDEX }
 # }
 
 sub _INDENT_CHAR {
-	$INDENT_CHAR = $_[0];
-	$INDENT      = &_INDENT;
+   $INDENT_CHAR = $_[0];
+   $INDENT      = &_INDENT;
 }
 
 sub _TINDENT_CHAR {
-	$TINDENT_CHAR = $_[0];
-	$TINDENT      = &_TINDENT;
+   $TINDENT_CHAR = $_[0];
+   $TINDENT      = &_TINDENT;
 }
 
 sub indent      { $INDENT }
 sub tidy_indent { $TINDENT }
 
 sub inc {
-	++$INDENT_INDEX;
-	$INDENT  = &_INDENT;
-	$TINDENT = &_TINDENT;
+   ++$INDENT_INDEX;
+   $INDENT  = &_INDENT;
+   $TINDENT = &_TINDENT;
 }
 
 sub dec {
-	--$INDENT_INDEX;
-	$INDENT  = &_INDENT;
-	$TINDENT = &_TINDENT;
+   --$INDENT_INDEX;
+   $INDENT  = &_INDENT;
+   $TINDENT = &_TINDENT;
 }
 
 sub getTidyFields { $TidyFields }
@@ -105,59 +108,59 @@ sub setTidyFields { $TidyFields = $_[1] }
 
 # output
 sub set_all {
-	$OutputStyle = "ALL";
+   $OutputStyle = "ALL";
 
-	$TSPACE = &space;
-	$TBREAK = &break;
-	$TCOMMA = &comma;
+   $TSPACE = &space;
+   $TBREAK = &break;
+   $TCOMMA = &comma;
 
-	#_INDENT_INDEX 0;
-	_INDENT_CHAR &space x 2;
-	_TINDENT_CHAR &space x 2;
+   #_INDENT_INDEX 0;
+   _INDENT_CHAR &space x 2;
+   _TINDENT_CHAR &space x 2;
 
-	__PACKAGE__->setTidyFields(NO);
+   __PACKAGE__->setTidyFields(NO);
 }
 
 sub set_tidy {
-	$OutputStyle = "TIDY";
+   $OutputStyle = "TIDY";
 
-	$TSPACE = &space;
-	$TBREAK = &break;
-	$TCOMMA = &comma;
+   $TSPACE = &space;
+   $TBREAK = &break;
+   $TCOMMA = &comma;
 
-	#_INDENT_INDEX 0;
-	_INDENT_CHAR &space x 2;
-	_TINDENT_CHAR &space x 2;
+   #_INDENT_INDEX 0;
+   _INDENT_CHAR &space x 2;
+   _TINDENT_CHAR &space x 2;
 
-	__PACKAGE__->setTidyFields(YES);
+   __PACKAGE__->setTidyFields(YES);
 }
 
 sub set_compact {
-	$OutputStyle = "COMPACT";
+   $OutputStyle = "COMPACT";
 
-	$TSPACE = &space;
-	$TBREAK = &break;
-	$TCOMMA = &comma;
+   $TSPACE = &space;
+   $TBREAK = &break;
+   $TCOMMA = &comma;
 
-	#_INDENT_INDEX 0;
-	_INDENT_CHAR &space x 2;
-	_TINDENT_CHAR NO;
+   #_INDENT_INDEX 0;
+   _INDENT_CHAR &space x 2;
+   _TINDENT_CHAR NO;
 
-	__PACKAGE__->setTidyFields(YES);
+   __PACKAGE__->setTidyFields(YES);
 }
 
 sub set_clean {
-	$OutputStyle = "CLEAN";
+   $OutputStyle = "CLEAN";
 
-	$TSPACE = NO;
-	$TBREAK = NO;
-	$TCOMMA = &space;
+   $TSPACE = NO;
+   $TBREAK = NO;
+   $TCOMMA = &space;
 
-	#_INDENT_INDEX 0;
-	_INDENT_CHAR NO;
-	_TINDENT_CHAR NO;
+   #_INDENT_INDEX 0;
+   _INDENT_CHAR NO;
+   _TINDENT_CHAR NO;
 
-	__PACKAGE__->setTidyFields(YES);
+   __PACKAGE__->setTidyFields(YES);
 }
 
 # precision
@@ -168,30 +171,80 @@ use constant minPrecisionOfDouble => 14;
 sub getPrecisionOfFloat { $PRECISION - 1 }
 
 sub setPrecisionOfFloat {
-	$PRECISION = X3DMath::min( maxPrecision, $_[1] + 1 );
-	$FLOAT = "%0.${PRECISION}g";
+   $PRECISION = X3DMath::min( maxPrecision, $_[1] + 1 );
+   $FLOAT = "%0.${PRECISION}g";
 }
 
 sub getPrecisionOfDouble { $DPRECISION - 1 }
 
 sub setPrecisionOfDouble {
-	$DPRECISION = X3DMath::min( maxPrecision, $_[1] + 1 );
-	$DOUBLE = "%0.${DPRECISION}g";
+   $DPRECISION = X3DMath::min( maxPrecision, $_[1] + 1 );
+   $DOUBLE = "%0.${DPRECISION}g";
 }
 
 sub getOutputStyle { $OutputStyle }
 
 sub setOutputStyle {
-	&set_all     if $_[1] eq "ALL";
-	&set_tidy    if $_[1] eq "TIDY";
-	&set_compact if $_[1] eq "COMPACT";
-	&set_clean   if $_[1] eq "CLEAN";
+   &set_all     if $_[1] eq "ALL";
+   &set_tidy    if $_[1] eq "TIDY";
+   &set_compact if $_[1] eq "COMPACT";
+   &set_clean   if $_[1] eq "CLEAN";
 }
 
 # STANDARD
 __PACKAGE__->setPrecisionOfFloat(7);
 __PACKAGE__->setPrecisionOfDouble(14);
 __PACKAGE__->setOutputStyle("TIDY");
+
+# BaseNode
+
+our $NodeToStringify     = undef;
+our $RegisteredNodes     = {};
+our $RegisteredNodeNames = {};
+
+sub isClone {
+   exists $RegisteredNodes->{ $_[1]->getId };
+}
+
+sub getName {
+   my $name = $_[1]->getName;
+
+   if ($name) {
+      if ( $RegisteredNodes->{ $_[1]->getId } > 1 ) {
+         $name .= "_";
+         $name .= $RegisteredNodes->{ $_[1]->getId } - 1;
+      }
+   } else {
+		# has routes
+	}
+
+   return $name;
+}
+
+sub registerNode {
+   $NodeToStringify = $_[1] unless $NodeToStringify;
+
+   if ( $_[1]->getName ) {
+      $RegisteredNodeNames->{ $_[1]->getName } = 0
+        unless exists $RegisteredNodeNames->{ $_[1]->getName };
+      $RegisteredNodes->{ $_[1]->getId } = ++$RegisteredNodeNames->{ $_[1]->getName };
+   }
+   else {
+      $RegisteredNodes->{ $_[1]->getId } = 1;
+   }
+
+   return;
+}
+
+sub unregisterNode {
+   if ( $_[1] == $NodeToStringify ) {
+      $NodeToStringify     = undef;
+      $RegisteredNodes     = {};
+      $RegisteredNodeNames = {};
+   }
+
+   return;
+}
 
 1;
 __END__

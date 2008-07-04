@@ -2,7 +2,7 @@ package X3D::Components::Core::Node;
 
 our $VERSION = '0.009';
 
-use X3D '
+use X3D::Package '
 X3DNode : X3DBaseNode {
   SFNode [in,out] metadata NULL [X3DMetadataObject]
 }
@@ -35,12 +35,12 @@ sub processEvent {
 sub prepareEvents   { }
 sub eventsProcessed { }
 
-sub dispose {
-	my ($this) = @_;
+#sub dispose {
+#	my ($this) = @_;
 	#return unless $this->getParents == 1;
 	#$this->{self}->setValue(undef);
-	return;
-}
+#	return;
+#}
 
 1;
 __END__

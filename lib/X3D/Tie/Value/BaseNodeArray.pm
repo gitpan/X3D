@@ -1,5 +1,5 @@
 package X3D::Tie::Value::BaseNodeArray;
-use X3D;
+use X3D::Perl;
 
 our $VERSION = '0.009';
 
@@ -38,6 +38,10 @@ sub removeParents {
 			delete $this->{nodes}->{$id};
 			$node->getParents->remove( $this->getParent );
 		}
+	}
+	
+	foreach my $node ( grep { $_ } @_ ) {
+		$node->dispose;
 	}
 }
 

@@ -11,13 +11,13 @@ BEGIN {
 	use_ok 'TestNodeX3D';
 }
 
-ok my $X3D = new X3D;
+ok my $X3D = new X3DTest;
 isa_ok $X3D, $_ foreach @{ $X3D->X3DPackage::getPath };
 ok $X3D ;
 isa_ok $X3D, $_ foreach @{  $X3D->getHierarchy };
 ok $X3D ;
 printf "%s\n", $X3D;
-is $X3D, "DEF " . $X3D->getName . " X3D { }";
+is $X3D, "X3DTest { }";
 
 X3DGenerator->setTidyFields(YES);
 printf "%s\n", $X3D;

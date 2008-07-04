@@ -3,7 +3,7 @@ use X3D::Perl;
 
 our $VERSION = '0.002';
 
-use X3D '
+use X3D::Package '
 X3DScene : X3DNode, X3DExecutionContext {
   SFNode   [in,out] metadata             NULL        [X3DMetadataObject]
   SFString []       specificationVersion "3.0"       ["1.0", "3.0"]

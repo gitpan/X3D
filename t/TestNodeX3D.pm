@@ -7,7 +7,7 @@ BEGIN {
 	unshift @INC, '../lib';
 }
 
-use X3D 'X3D : X3DBaseNode {
+use X3D::Package 'X3DTest : X3DBaseNode {
   SFNode   [in,out] metadata    NULL    [X3DMetadataObject]
   MFString []       family      "SERIF"
   SFBool   []       horizontal  FALSE

@@ -1,45 +1,41 @@
 package X3D::Field;
-use X3D;
+use X3D::Perl;
 
 our $VERSION = '0.015';
 
 use X3D::Parse::FieldValue;
 
 sub SET_DESCRIPTION {
-	my ( $this, $description ) = @_;
-	my $typeName        = $description->{typeName};
-	my $defaultValue    = X3D::Parse::FieldValue::parse( $typeName, @{ $description->{body} } );
-	my $fieldDefinition = new X3DFieldDefinition( $typeName, YES, YES, '', $defaultValue, '' );
-	$this->X3DPackage::Scalar("X3DDefaultDefinition") = $fieldDefinition;
+   my ( $this, $description ) = @_;
+   my $typeName        = $description->{typeName};
+   my $defaultValue    = X3D::Parse::FieldValue::parse( $typeName, @{ $description->{body} } );
+   my $fieldDefinition = new X3DFieldDefinition( $typeName, YES, YES, '', $defaultValue, '' );
+   $this->X3DPackage::Scalar("X3DDefaultDefinition") = $fieldDefinition;
 }
 
-use X3D 'X3DField : X3DObject { }', 'new';
+use X3D::Package 'X3DField : X3DObject { }', 'new';
 
 use overload
-  '=' => 'getClone',
+  '='    => 'getClone',
   'bool' => sub { $_[0]->getValue ? YES : NO },
   ;
 
 sub new {
-	my $this = shift->X3DObject::new;
+   my $this = shift->X3DObject::new;
 
-	$this->setDefinition( $this->X3DPackage::Scalar("X3DDefaultDefinition") );
+   $this->setDefinition( $this->X3DPackage::Scalar("X3DDefaultDefinition") );
 
-	$this->create;
+   $this->create;
 
-	if (@_) {
-		$this->setValue(@_);
-		$this->setTainted(NO);
-	}
+   if (@_) {
+      $this->setValue(@_);
+      $this->setTainted(NO);
+   }
 
-	return $this;
+   return $this;
 }
 
-sub create {
-	my ($this) = @_;
-	$this->{value} = $this->getInitialValue;
-	return;
-}
+sub create { }
 
 sub getClone { $_[0]->new( $_[0]->getValue ) }
 
@@ -61,12 +57,12 @@ sub getName { $_[0]->getDefinition->getName }
 sub getValue { $_[0]->{value} }
 
 sub setValue {
-	my ( $this, $value ) = @_;
+   my ( $this, $value ) = @_;
 
-	$this->{value} = $value;
-	$this->setTainted(time);
+   $this->{value} = $value;
+   $this->setTainted(time);
 
-	return;
+   return;
 }
 
 #*

@@ -31,7 +31,6 @@ use X3D::FieldTypes;
 
 use X3D::Constants;
 
-use X3D::Name;
 use X3D::BaseNode;
 use X3D::Route;
 

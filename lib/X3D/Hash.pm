@@ -2,13 +2,14 @@ package X3D::Hash;
 
 our $VERSION = '0.009';
 
-use X3D 'X3DHash { }', 'isHash';
+use X3D::Package 'X3DHash { }', 'isHash';
+
 
 use overload
   'bool' => 'getSize',
 
-  'int' => 'getSize',
   '0+'  => 'getSize',
+  'int' => 'getSize',
   #  '<=>' => sub { warn },
   #  'cmp' => sub { warn },
 
@@ -27,8 +28,8 @@ sub getClone {
 	return $clone;
 }
 
-sub getKeys   { new X3DArray [ keys( %{ $_[0] } ) ] }
-sub getValues { new X3DArray [ values( %{ $_[0] } ) ] }
+sub getKeys   { new X3D::Array [ keys( %{ $_[0] } ) ] }
+sub getValues { new X3D::Array [ values( %{ $_[0] } ) ] }
 
 sub getSize { scalar keys %{ $_[0] } }
 

@@ -2,7 +2,7 @@ package X3D::Callbacks;
 
 our $VERSION = '0.005';
 
-use X3D 'X3DCallbacks : X3DArrayHash ()';
+use X3D::Package 'X3DCallbacks : X3DArrayHash ()';
 
 use Scalar::Util ();
 

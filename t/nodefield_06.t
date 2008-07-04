@@ -11,7 +11,7 @@ BEGIN {
 	use_ok 'TestNodeX3D';
 }
 
-ok my $X3D    = new X3D;
+ok my $X3D    = new X3DTest;
 ok my $styleId = $X3D->style->getId;
 is $styleId, $X3D->style->getId;
 is $X3D->metadata, undef;
@@ -158,7 +158,7 @@ $field = $X3D->size;                        #25 # $X3D->size->clone
 #$field->setValue(123);
 
 ok $X3D->size = 2;                             #33
-is $X3D, 'DEF '.$X3D->getName.' X3D {
+is $X3D, 'X3DTest {
   size 2
 }';                                             #34
 
@@ -171,7 +171,7 @@ is $X3D->size++, 7;
 is $X3D->size++, 8;
 is $X3D->size, 9;
 
-is $X3D, 'DEF '.$X3D->getName.' X3D {
+is $X3D, 'X3DTest {
   size 9
 }';
 

@@ -7,6 +7,7 @@ BEGIN {
 	$| = 1;
 	chdir 't' if -d 't';
 	unshift @INC, '../lib';
+	use_ok 'X3D';
 	use_ok 'TestNodeFields';
 }
 
@@ -38,7 +39,7 @@ ok $testNode->getId != $testNode->getClone->getId;
 ok $testNode->getId != $testNode->getCopy->getId;
 
 ok $testNode->getId != $testNode->getCopy->getId;
-ok $testNode ne $testNode->getCopy;
+ok $testNode eq $testNode->getCopy;
 
 ok my $clone = $testNode->getClone;
 ok my $copy  = $testNode->getCopy;
@@ -71,8 +72,8 @@ ok UNIVERSAL::isa($sfnode, 'X3DBaseNode');
 
 ok $testNode != $clone;
 ok $testNode != $copy;
-ok $testNode ne $clone;
-ok $testNode ne $copy;
+ok $testNode eq $clone;
+ok $testNode eq $copy;
 
 is $sfnodeId, $testNode->sfnode->getId;
 

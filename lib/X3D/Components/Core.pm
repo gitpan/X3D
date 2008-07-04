@@ -12,7 +12,7 @@ use X3D::Components::Core::SensorNode;
 use X3D::Components::Core::InfoNode;
 
 #Node reference
-use X3D::Namespace;
+use X3D::Namespace 'X3D';
 
 use X3D::Components::Core::Nodes::MetadataDouble;
 use X3D::Components::Core::Nodes::MetadataFloat;

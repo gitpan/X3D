@@ -7,6 +7,7 @@ BEGIN {
 	$| = 1;
 	chdir 't' if -d 't';
 	unshift @INC, '../lib';
+	use_ok 'X3D';
 	use_ok 'TestNodeFields';
 }
 

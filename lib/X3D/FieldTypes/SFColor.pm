@@ -2,7 +2,7 @@ package X3D::FieldTypes::SFColor;
 
 our $VERSION = '0.009';
 
-use X3D 'SFColor : X3DField { 0 0 0 }';
+use X3D::Package 'SFColor : X3DField { 0 0 0 }';
 
 use base 'X3D::BaseFieldTypes::Vector';
 

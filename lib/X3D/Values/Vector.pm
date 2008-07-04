@@ -46,13 +46,13 @@ use overload
 
   'sqrt' => sub { $_[0]->new( [ map { CORE::sqrt($_) } @{ $_[0] } ] ) },
 
-  #"atan2"
+  #'atan2'
 
-  #"<>"
+  #'<>'
 
   #'${}', '@{}', '%{}', '&{}', '*{}'.
 
-  #"nomethod", "fallback",
+  #'nomethod', 'fallback',
 
   '""' => 'toString',
   ;

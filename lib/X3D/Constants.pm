@@ -2,7 +2,7 @@ package X3D::Constants;
 
 our $VERSION = '0.01';
 
-use X3D 'X3DConstants';
+use X3D::Package 'X3DConstants';
 
 sub NULL ()  { new SFNode(undef) }
 sub FALSE () { new SFBool(NO) }

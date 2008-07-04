@@ -47,7 +47,8 @@ BEGIN {
          Math::Quaternion => 0,
          Math::Trig       => 0,
          Math::Complex    => 0,
-         Inline           => 0,
+
+         X3D::Values::Int32 => 0,
 
          #Array
          Algorithm::Numerical::Shuffle => 0,

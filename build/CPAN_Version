@@ -36,7 +36,7 @@ sub main {
    return if $originalFile eq $previousFile;
    print CONSOLE "$file\n" if $DEBUG > 0;
 
-	$originalFile =~ s/(\$VERSION\s*=\s*)([.0-9]*)/$1.sprintf("%g", $2+$count)/e;
+	$originalFile =~ s/(\$VERSION\s*=\s*['"]*)([.0-9]*)(['"]*)/$1.sprintf("%g", $2+$count).$3/e;
 
 	open FILE, ">$file";
 	print FILE $originalFile;

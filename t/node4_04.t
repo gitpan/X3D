@@ -11,8 +11,8 @@ BEGIN {
 	use_ok 'TestNodeX3D';
 }
 
-ok new SFNode( new X3D );
-ok my $X3D = new X3D;
+ok new SFNode( new X3DTest );
+ok my $X3D = new X3DTest;
 isa_ok $X3D->getField('style'),   'X3DField';
 isa_ok $X3D->getField('spacing'), 'X3DField';
 isa_ok $X3D->getField('string'),  'X3DField';

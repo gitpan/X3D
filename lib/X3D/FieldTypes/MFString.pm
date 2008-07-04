@@ -2,7 +2,7 @@ package X3D::FieldTypes::MFString;
 
 our $VERSION = '0.01';
 
-use X3D 'MFString : X3DArrayField { [] }';
+use X3D::Package 'MFString : X3DArrayField { [] }';
 
 sub sort { $_[0]->new( [ sort { $a cmp $b } @{ $_[0] } ] ) }
 

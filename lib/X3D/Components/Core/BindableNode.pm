@@ -2,7 +2,7 @@ package X3D::Components::Core::BindableNode;
 
 our $VERSION = '0.002';
 
-use X3D 'X3DBindableNode : X3DChildNode {
+use X3D::Package 'X3DBindableNode : X3DChildNode {
   SFBool [in]     set_bind
   SFNode [in,out] metadata NULL [X3DMetadataObject]
   SFTime [out]    bindTime

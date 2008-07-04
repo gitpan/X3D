@@ -1,5 +1,5 @@
 package X3D::Parse::FieldDescription;
-use X3D;
+use X3D::Perl;
 
 our $VERSION = '0.01';
 
@@ -41,11 +41,13 @@ sub fieldDescription {
 			my $in  = &in($string);
 			my $out = &out($string);
 
+
 			if ( $$string =~ m.$_close_bracket.gc )
 			{
 				my $name = &Id($string);
 				if ( defined $name )
 				{
+
 					if ( not( $in xor $out ) )
 					{
 						my $value = eval { X3D::Parse::FieldValue::fieldValue( $type, $string ) };

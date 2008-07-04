@@ -48,7 +48,6 @@ can_ok $node1, qw'
 ok $node1->getId;
 is $node1->getType,     'X3DBaseNode';
 is $node1->getTypeName, 'X3DBaseNode';
-ok $node1->getName =~ /^_\d+/;
 
 printf "\n";
 printf "%s\n", $node1->getId;
@@ -57,7 +56,6 @@ printf "%s\n", $node1->getTypeName;
 printf "%s\n", $node1->getName;
 printf "%s\n", $node1;
 
-ok $node1->getName =~ /^_\d+/;
 ok $node1->getName !~ /Texture$/o;
 
 ok my $node2 = new X3DBaseNode("nodeName");

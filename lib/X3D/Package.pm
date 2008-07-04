@@ -16,7 +16,9 @@ use X3D::Parse::Concept;
 our $_space     = qr/\s+/so;
 our $_type_name = qr/^([\$\@%&*]?)(.*)/so;
 
-our $Namespace = "";
+our $Initialized = NO;
+our $Types       = [];
+our $Namespace   = "";
 
 sub import {
    shift;
@@ -25,63 +27,65 @@ sub import {
 
    #warnings::unimport('redefine');
    X3D::Perl->export_to_level(1);
-   X3D::Package::createType( scalar caller, 'X3DUniversal', @_ );
+   X3D::Package->registerType( $Namespace, scalar caller, 'X3DUniversal', @_ ) if @_;
 }
-
-#sub import {
-#	my $to = shift;
-#
-#	return unless @_;
-#	#Carp::carp ( "X3DPackage::import" );
-#
-#	my $alias = shift;
-#
-#	#	unless ($to) {
-#	#		Carp::carp  "caller(1)", caller(1);
-#	#		$to = caller(1);
-#	#	}
-#
-#	if ( $to eq __PACKAGE__ ) {    # use package 'newname', @import;
-#		my $original = caller;
-#		return X3DPackage::base( $alias, $original, @_ );
-#	}
-#	else {                         # X3DPackage::import
-#		return X3DPackage::_import( $to, $alias, @_ );
-#	}
-#}
 
 sub exists { UNIVERSAL::can( $_[0], 'can' ) ? YES : NO }
 
+sub initialized {
+   shift;
+   $Initialized = shift if @_;
+   return $Initialized;
+}
+
+sub registerType {
+   my $class = shift;
+   push @$Types, [@_];
+   $class->createTypes if $Initialized;
+}
+
+sub createTypes {
+   X3D::Package::createType(@$_) foreach @$Types;
+   @$Types = ();
+}
+
 sub createType {
-	my ( $package, $base, $declaration, @imports ) = @_;
+   my ( $namespace, $package, $base, $declaration, @imports ) = @_;
 
-	my $description = X3D::Parse::Concept::parse($declaration);
-	if ( ref $description ) {
+   #print "#", $package;
 
-		my $typeName = $description->{typeName};
+   my $description = X3D::Parse::Concept::parse($declaration);
+   if ( ref $description ) {
 
-		my $packageName = $Namespace ? "$Namespace\::$typeName" : $typeName;
-		#printf "X3DUniversal createType %s %s %s %s\n", $package, $base, $typeName, $packageName;
+      my $typeName = $description->{typeName};
 
-		X3DPackage::setBase( $packageName, $package, @imports );
-		X3DPackage::setSupertypes( $packageName,
-			@{ $description->{supertypes} } ?
-			  @{ $description->{supertypes} } :
-			  $base
-		);
-		#X3DPackage::setBase( $typeName, $description->{base} );
+      my $packageName = $namespace ? "$namespace\::$typeName" : $typeName;
 
-		#printf "X3DUniversal createType %s : %s %s\n", $typeName, $package, $base;
-		X3DPackage::Scalar( $packageName, "Description" ) = $description;
+      #printf "X3DUniversal createType %s %s %s %s\n", $package, $base,
+      #  $typeName, $packageName;
 
-		$packageName->SET_DESCRIPTION($description)
-		  if $packageName->can('SET_DESCRIPTION');
+      X3DPackage::setBase( $packageName, $package, @imports );
+      X3DPackage::setSupertypes(
+         $packageName, @{ $description->{supertypes} }
+         ? @{ $description->{supertypes} }
+         : $base
+      );
 
-	} else {
-		Carp::croak "Error Parse::Concept: '$declaration'\n", $@ if $@;
-	}
+      #printf "X3DUniversal createType %s : %s %s\n", $typeName, $package, $base;
+      X3DPackage::Scalar( $packageName, "Description" ) = $description;
 
-	return;
+      $packageName->SET_DESCRIPTION($description)
+        if $packageName->can('SET_DESCRIPTION');
+
+      #printf "OK X3DUniversal createType %s %s %s %s\n", $package, $base,
+      #  $typeName, $packageName;
+
+   }
+   else {
+      Carp::croak "Error Parse::Concept: '$declaration'\n", $@ if $@;
+   }
+
+   return;
 }
 
 sub getName { ref( $_[0] ) || $_[0] }
@@ -91,33 +95,32 @@ sub setNamespace { $Namespace = $_[1] || '' }
 
 #sub getPath { [ Class::ISA::self_and_super_path( X3DPackage::getName( $_[0] ) ) ] }
 sub getPath {
-	my $package = $_[0];
+   my $package = $_[0];
 
-	Carp::croak "Package '$package' does not exists."
-	  unless X3DPackage::exists($package);
+   Carp::croak "Package '$package' does not exists."
+     unless X3DPackage::exists($package);
 
-	unless ( defined $package->X3DPackage::Scalar('X3DPath') )
-	{
-		my @path;
-		my @supertypes = ( X3DPackage::getName($package) );
+   unless ( defined $package->X3DPackage::Scalar('X3DPath') ) {
+      my @path;
+      my @supertypes = ( X3DPackage::getName($package) );
 
-		while (@supertypes) {
-			$_ = shift @supertypes;
-			unshift @path,       $_;
-			unshift @supertypes, @{ X3DPackage::getSupertypes($_) };
-		}
+      while (@supertypes) {
+         $_ = shift @supertypes;
+         unshift @path,       $_;
+         unshift @supertypes, @{ X3DPackage::getSupertypes($_) };
+      }
 
-		my $type;
-		my $path;
-		foreach (@path) {
-			unshift @$path, $_ unless exists $type->{$_};
-			$type->{$_} = 1;
-		}
+      my $type;
+      my $path;
+      foreach (@path) {
+         unshift @$path, $_ unless exists $type->{$_};
+         $type->{$_} = 1;
+      }
 
-		$package->X3DPackage::Scalar('Path') = $path;
-	}
+      $package->X3DPackage::Scalar('Path') = $path;
+   }
 
-	return $package->X3DPackage::Scalar('Path');
+   return $package->X3DPackage::Scalar('Path');
 }
 
 #sub getSuperpath {
@@ -126,22 +129,22 @@ sub getPath {
 #}
 
 sub getSupertype {
-	my $package = $_[0];
+   my $package = $_[0];
 
-	Carp::croak "Package '$package' does not exists."
-	  unless X3DPackage::exists($package);
+   Carp::croak "Package '$package' does not exists."
+     unless X3DPackage::exists($package);
 
-	my $isa = \X3DPackage::Array( $_[0], 'ISA' );
+   my $isa = \X3DPackage::Array( $_[0], 'ISA' );
 
-	return $isa->[0] if @$isa;
+   return $isa->[0] if @$isa;
 }
 
 sub getSupertypes { [ X3DPackage::Array( $_[0], 'ISA' ) ] }
 
 sub setSupertypes {
-	my $package = shift;
-	$package->X3DPackage::setBase($_) foreach @_;
-	return;
+   my $package = shift;
+   $package->X3DPackage::setBase($_) foreach @_;
+   return;
 }
 
 #sub create {
@@ -151,26 +154,28 @@ sub setSupertypes {
 #}
 
 sub setBase {
-	#Carp::carp ( "X3DPackage::alias" );
-	my $name = X3DPackage::getName(shift);
-	my $base = shift;
 
-	return if !$base || $name eq $base;
+   #Carp::carp ( "X3DPackage::alias" );
+   my $name = X3DPackage::getName(shift);
+   my $base = shift;
 
-	#unshift @{ X3DPackage::array( $name, "ISA" ) }, $base;
-	my $expression = X3DPackage::expression( $name, $base, @_ );
-	eval $expression;
-	if ($@) {
-		unless ( X3DPackage::exists($base) ) {
-			Carp::croak "Package $base does not exists or could not be loaded.";
-		}
-		#printf "%s\n", $expression;
-		Carp::croak $@;
-		Carp::croak "Syntax error";
-		return;
-	}
+   return if !$base || $name eq $base;
 
-	return YES;
+   #unshift @{ X3DPackage::array( $name, "ISA" ) }, $base;
+   my $expression = X3DPackage::expression( $name, $base, @_ );
+   eval $expression;
+   if ($@) {
+      unless ( X3DPackage::exists($base) ) {
+         Carp::croak "Package $base does not exists or could not be loaded.";
+      }
+
+      #printf "%s\n", $expression;
+      Carp::croak $@;
+      Carp::croak "Syntax error";
+      return;
+   }
+
+   return YES;
 }
 
 # sub constants {
@@ -186,214 +191,218 @@ sub setBase {
 #*alias = \&base;
 
 sub expression {
-	my $alias    = shift;
-	my $original = shift;
-	#Carp::carp ( "X3DPackage::expression", @_);
+   my $alias    = shift;
+   my $original = shift;
 
-	my $expression;
+   #Carp::carp ( "X3DPackage::expression", @_);
 
-	$expression .= "package $alias;\n";
-	$expression .= "use $original;\n" if $original ne 'main' && !X3DPackage::exists($original);
-	$expression .= "use base '$original';\n";
+   my $expression;
 
-	if (@_) {
-		$expression .= "use strict;\n";
-		$expression .= "use warnings;\n";
+   $expression .= "package $alias;\n";
+   $expression .= "use $original;\n"
+     if $original ne 'main' && !X3DPackage::exists($original);
+   $expression .= "use base '$original';\n";
 
-		$expression .= X3DPackage::statements( $original, @_ );
-	}
+   if (@_) {
+      $expression .= "use strict;\n";
+      $expression .= "use warnings;\n";
 
-	#Carp::carp ( $expression );
-	return $expression;
+      $expression .= X3DPackage::statements( $original, @_ );
+   }
+
+   #Carp::carp ( $expression );
+   return $expression;
 }
 
 sub _import {
-	my $alias    = shift;
-	my $original = shift;
+   my $alias    = shift;
+   my $original = shift;
 
-	my $expression;
+   my $expression;
 
-	$expression .= "package $alias;\n";
+   $expression .= "package $alias;\n";
 
-	if (@_) {
-		$expression .= "use strict;\n";
-		$expression .= "use warnings;\n";
+   if (@_) {
+      $expression .= "use strict;\n";
+      $expression .= "use warnings;\n";
 
-		unless ( X3DPackage::exists($original) ) {
-			$expression .= "use $original;\n";
-		}
+      unless ( X3DPackage::exists($original) ) {
+         $expression .= "use $original;\n";
+      }
 
-		$expression .= X3DPackage::statements( $original, @_ );
-	}
+      $expression .= X3DPackage::statements( $original, @_ );
+   }
 
-	printf "%s\n", $expression;
-	eval $expression;
+   printf "%s\n", $expression;
+   eval $expression;
 
-	if ($@) {
-		#printf "%s\n", $expression;
-		Carp::croak $@;
-		Carp::croak "Syntax error";
-		return;
-	}
+   if ($@) {
 
-	return YES;
+      #printf "%s\n", $expression;
+      Carp::croak $@;
+      Carp::croak "Syntax error";
+      return;
+   }
+
+   return YES;
 }
 
 sub statements {
-	my $original = shift;
+   my $original = shift;
 
-	my $expression;
+   my $expression;
 
-	return '' unless @_;
+   return '' unless @_;
 
-	foreach (@_) {
+   foreach (@_) {
 
-		if ( 'ARRAY' eq ref $_ ) {
+      if ( 'ARRAY' eq ref $_ ) {
 
-			$expression .= X3DPackage::statements( $original, @$_ );
+         $expression .= X3DPackage::statements( $original, @$_ );
 
-		}
-		elsif ( 'HASH' eq ref $_ ) {
-			while ( my ( $a, $o ) = each %$_ ) {
-				if ( $a =~ m.$_type_name.gc && $1 ) {
-					my $t = $1;
-					$a = $2;
-					if ( $o =~ m.$_type_name.gc ) {
-						$t = $1 if $1;
-						$expression .= get_rename_string( $a, $t, $original, $2 );
-					}
-					else {
-						Carp::croak "Syntax error";
-					}
-				}
-				else {
-					$expression .= get_rename_string( $a, '&', $original, $o );
-				}
-			}
-		}
-		else {
-			foreach ( split /$_space/, $_ ) {
-				if ( m.$_type_name.gc && $1 ) {
-					$expression .= get_rename_string( $2, $1, $original, $2 );
-				}
-				else {
-					$expression .= get_rename_string( $_, '&', $original, $_ );
-				}
-			}
-		}
-	}
+      }
+      elsif ( 'HASH' eq ref $_ ) {
+         while ( my ( $a, $o ) = each %$_ ) {
+            if ( $a =~ m.$_type_name.gc && $1 ) {
+               my $t = $1;
+               $a = $2;
+               if ( $o =~ m.$_type_name.gc ) {
+                  $t = $1 if $1;
+                  $expression .= get_rename_string( $a, $t, $original, $2 );
+               }
+               else {
+                  Carp::croak "Syntax error";
+               }
+            }
+            else {
+               $expression .= get_rename_string( $a, '&', $original, $o );
+            }
+         }
+      }
+      else {
+         foreach ( split /$_space/, $_ ) {
+            if ( m.$_type_name.gc && $1 ) {
+               $expression .= get_rename_string( $2, $1, $original, $2 );
+            }
+            else {
+               $expression .= get_rename_string( $_, '&', $original, $_ );
+            }
+         }
+      }
+   }
 
-	return $expression;
+   return $expression;
 }
 
 sub get_rename_string {
-	my ( $name, $type, $package, $original ) = @_;
+   my ( $name, $type, $package, $original ) = @_;
 
-	#Carp::carp  sprintf "\t*%s = \\%s;\n", ( $alias, $original ) if $original =~ /::/so;
+   #Carp::carp  sprintf "\t*%s = \\%s;\n", ( $alias, $original ) if $original =~ /::/so;
 
-	return sprintf "\t*%s = \\%s;\n", ( $name, $original ) if $original =~ /::/so;
+   return sprintf "\t*%s = \\%s;\n", ( $name, $original )
+     if $original =~ /::/so;
 
-	return sprintf "\t*%s = \\%s%s::%s;\n", ( $name, $type, $package, $original );
+   return sprintf "\t*%s = \\%s%s::%s;\n", ( $name, $type, $package, $original );
 }
 
 ##
 
 sub Scalar : lvalue {
-	my ( $this, $name ) = @_;
-	my $property = sprintf '%s::%s', $this->X3DPackage::getName, $name;
-	no strict 'refs';
-	no warnings;
-	$$property;
+   my ( $this, $name ) = @_;
+   my $property = sprintf '%s::%s', $this->X3DPackage::getName, $name;
+   no strict 'refs';
+   no warnings;
+   $$property;
 }
 
 sub Array : lvalue {
-	my ( $this, $name ) = @_;
-	my $property = sprintf '%s::%s', $this->X3DPackage::getName, $name;
-	no strict 'refs';
-	@$property;
+   my ( $this, $name ) = @_;
+   my $property = sprintf '%s::%s', $this->X3DPackage::getName, $name;
+   no strict 'refs';
+   @$property;
 }
 
 sub Hash : lvalue {
-	my ( $this, $name ) = @_;
-	my $property = sprintf '%s::%s', $this->X3DPackage::getName, $name;
-	no strict 'refs';
-	%$property;
+   my ( $this, $name ) = @_;
+   my $property = sprintf '%s::%s', $this->X3DPackage::getName, $name;
+   no strict 'refs';
+   %$property;
 }
 
 sub Glob : lvalue {
-	my ( $this, $name ) = @_;
-	my $property = sprintf '%s::%s', $this->X3DPackage::getName, $name;
-	no strict 'refs';
-	*$property;
+   my ( $this, $name ) = @_;
+   my $property = sprintf '%s::%s', $this->X3DPackage::getName, $name;
+   no strict 'refs';
+   *$property;
 }
 
 sub getSubroutine {
-	my ( $this, $name ) = @_;
-	my $property = sprintf "%s::X3DSubroutine::%s", $this->X3DPackage::getName, $name;
+   my ( $this, $name ) = @_;
+   my $property = sprintf "%s::X3DSubroutine::%s", $this->X3DPackage::getName, $name;
 
-	no strict 'refs';
-	unless ( defined $$property ) {
-		$$property = [];
-		push @$$property, reverse map { \&{"${_}::${name}"} }
-		  grep { exists &{"${_}::${name}"} } @{ X3DPackage::getPath($this) };
-	}
+   no strict 'refs';
+   unless ( defined $$property ) {
+      $$property = [];
+      push @$$property, reverse map { \&{"${_}::${name}"} }
+        grep { exists &{"${_}::${name}"} } @{ X3DPackage::getPath($this) };
+   }
 
-	return $$property;
+   return $$property;
 }
 
-sub Call {
-	my ( $this, $name ) = ( shift, shift );
-	$_->( $this, @_ ) foreach @{ $this->X3DPackage::getSubroutine($name) };
-	return;
+sub call {
+   my ( $this, $name, @value ) = @_;
+   $_->( $this, @value ) foreach @{ $this->X3DPackage::getSubroutine($name) };
+   return;
 }
 
-#sub reverse_call {
-#	my ( $this, $name ) = ( shift, shift );
-#	return map { &$_( $this, @_ ) } reverse X3DPackage::can( $this, $name );
-#}
+sub reverseCall {
+   my ( $this, $name, @value ) = @_;
+   $_->( $this, @value ) foreach reverse $this->X3DPackage::getSubroutine($name);
+   return;
+}
 
 #sub sub { ( caller( ( $_[1] || 0 ) + 1 ) )[3] }
 
 sub toString {
-	my $package = shift;
-	my $level   = shift || 1;
-	my $string  = '';
+   my $package = shift;
+   my $level   = shift || 1;
+   my $string  = '';
 
-	Carp::croak "Package '$package' does not exists."
-	  unless X3DPackage::exists($package);
+   Carp::croak "Package '$package' does not exists."
+     unless X3DPackage::exists($package);
 
-	$string .= $package->X3DPackage::getName;
+   $string .= $package->X3DPackage::getName;
 
-	my $hierarchy = \X3DPackage::Array( $package, 'ISA' );
+   my $hierarchy = \X3DPackage::Array( $package, 'ISA' );
 
-	$string .= ' ';
-	$string .= '[';
+   $string .= ' ';
+   $string .= '[';
 
-	if (@$hierarchy) {
+   if (@$hierarchy) {
 
-		if ($#$hierarchy) {
-			$string .= "\n";
-			$string .= '  ' x $level;
-		} else {
-			$string .= ' ';
-		}
+      if ($#$hierarchy) {
+         $string .= "\n";
+         $string .= '  ' x $level;
+      }
+      else {
+         $string .= ' ';
+      }
 
-		$string .= join "\n" . ( '  ' x $level ), map {
-			$_->X3DPackage::toString( $level + 1 );
-		} @$hierarchy;
+      $string .= join "\n" . ( '  ' x $level ), map { $_->X3DPackage::toString( $level + 1 ); } @$hierarchy;
 
-		if ($#$hierarchy) {
-			$string .= "\n";
-			$string .= '  ' x ( $level - 1 );
-		}
-		else {
-			$string .= ' ';
-		}
-	}
+      if ($#$hierarchy) {
+         $string .= "\n";
+         $string .= '  ' x ( $level - 1 );
+      }
+      else {
+         $string .= ' ';
+      }
+   }
 
-	$string .= ']';
+   $string .= ']';
 
-	return $string;
+   return $string;
 }
 
 1;

@@ -3,7 +3,7 @@ use strict;
 
 our $VERSION = '0.002';
 
-use X3D 'X3DRoute { }';
+use X3D::Package 'X3DRoute { }';
 
 # sub create {
 # 	my $this = shift;

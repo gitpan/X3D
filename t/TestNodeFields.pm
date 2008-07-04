@@ -7,7 +7,7 @@ BEGIN {
 	unshift @INC, '../lib';
 }
 
-use X3D 'TestNode : X3DBaseNode {
+use X3D::Package 'TestNode : X3DBaseNode {
 	MFBool		[in,out] mfbool	   []
 	MFColor		[in,out] mfcolor	   []
 	MFColorRGBA	[in,out] mfcolorrgba []

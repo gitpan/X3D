@@ -2,7 +2,7 @@ package X3D::Message;
 
 our $VERSION = '0.01';
 
-use X3D 'X3DMessage';
+use X3D::Package 'X3DMessage';
 
 use Carp ();
 

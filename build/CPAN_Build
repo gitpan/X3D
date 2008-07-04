@@ -3,12 +3,13 @@
 use strict;
 
 our $VERSION = 0.001;
-
+use Cwd 'abs_path';
 
 my $console = "$ENV{HOME}/.xsession-errors";
 open CONSOLE, ">>$console";
 
-my $cpanversion = "$ENV{HOME}/perl/cpan/X3D/bin/CPAN_Version";
+my $count       = 0.001;
+my $cpanversion = "CPAN_Version";
 
 build($_) foreach @ARGV;
 
@@ -33,29 +34,51 @@ sub dist {
 
 	system "perl Makefile.PL | grep OK";
 	system "make manifest 2>&1 | grep OK";
-	system "cat MANIFEST | $cpanversion $package +0.001 | grep OK";
+	system "cat MANIFEST | $cpanversion $package +$count | grep OK";
 	system "perl Makefile.PL | grep OK";
 	my $test = system "make test 1>>$console 2>>$console | grep OK";
-
+	
 	my ( $tmp, @links ) = remove_links($folder);
 	return unless $tmp;
 
+
 	my $dist = system "make dist 1>>$console 2>>$console | grep OK";
-	system "cat MANIFEST | $cpanversion $package -0.001 | grep OK" unless $dist || $test;
+	system "cat MANIFEST | $cpanversion $package -$count | grep OK" unless $dist || $test;
+	#printf "%d, %d", $dist?1:0 , $test?1:0;
 
 	insert_links( $tmp, $folder, @links );
 
 	system "mkdir -p ../test/";
-	system "mv '../$package-'[0-9].[0-9]*.gz ../test 2>/dev/null | grep OK";
-	system "mv '$package-'[0-9].[0-9]*.gz ../ 2>/dev/null | grep OK";
+
+	#
+	my $build_number = 0;
+	if (-e ".build") {
+		$build_number = `cat .build`;
+		chomp $build_number;
+	}
+
+	#
+	$build_number++;
+	system "echo $build_number > .build";
 
 
+	#
+	my $gz = `ls '$package-'[0-9].[0-9]*.gz`;
+	chomp $gz;
+	$gz =~ s/(\.tar\.gz)$/sprintf "_%03d%s", $build_number, $1/e;
+	print $gz;
+
+	#
+	system "mv '../$package-'[0-9].[0-9_]*.gz ../test 2>/dev/null | grep OK";
+	system "mv '$package-'[0-9].[0-9]*.gz ../$gz 2>/dev/null | grep OK";
+
+	#
 	system "mv /tmp/$$-auto lib/auto" if -e "/tmp/$$-auto";
 	return 1;
 }
 
 sub build {
-	my $file = shift;
+	my $file = abs_path shift;
 	$file = "$file/Makefile.PL" if -d $file;
 	return unless -e $file;
 

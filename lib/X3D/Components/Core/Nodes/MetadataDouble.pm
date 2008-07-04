@@ -2,7 +2,7 @@ package X3D::Components::Core::Nodes::MetadataDouble;
 
 our $VERSION = '0.003';
 
-use X3D 'MetadataDouble : X3DNode, X3DMetadataObject {
+use X3D::Package 'MetadataDouble : X3DNode, X3DMetadataObject {
   SFNode   [in,out] metadata  NULL [X3DMetadataObject]
   SFString [in,out] name      ""
   SFString [in,out] reference ""

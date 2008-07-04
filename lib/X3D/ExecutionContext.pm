@@ -3,7 +3,7 @@ use X3D::Perl;
 
 our $VERSION = '0.002';
 
-use X3D '
+use X3D::Package '
 X3DExecutionContext : X3DObject {
   SFString []       specificationVersion "3.0"       ["1.0", "3.0"]
   SFString []       encoding             "Scripted"  ["Scripted", "ASCII", "VRML", "XML", "Binary", "BIFS"]

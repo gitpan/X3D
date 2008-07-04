@@ -1,5 +1,5 @@
 package X3D::ArrayField;
-use X3D;
+use X3D::Perl;
 
 our $VERSION = '0.012';
 
@@ -9,9 +9,9 @@ sub SET_DESCRIPTION {
 	$_[0]->X3DPackage::Scalar("FieldType") = 'S' . substr $description->{typeName}, 1;
 }
 
-use X3D 'X3DArrayField : X3DField { [] }';
+use X3D::Package 'X3DArrayField : X3DField { [] }';
 
-use base 'X3DArray';
+use base 'X3D::Array';
 
 use X3D::Tie::Value::Array;
 use X3D::Tie::ArrayLength;
